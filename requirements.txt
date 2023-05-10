@@ -1,9 +1,12 @@
-
+numpy==1.21.5
 imblearn
 xgboost
 pandas
-numpy==1.21.5
-sklearn==1.1.2
+scikit-learn==1.1.2
 threadpoolctl==2.2.0
 pytest
+flask
+dash
+dash-bootstrap-components
+requests
 
