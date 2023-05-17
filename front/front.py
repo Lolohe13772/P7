@@ -1,11 +1,20 @@
 import dash
+import pickle
 from dash import dcc, html, Input, Output
 import requests
 import pandas as pd
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import numpy as np
+import matplotlib.pyplot as  plt
+import seaborn as sns
+
 app = dash.Dash( external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Charger le modèle entraîné
+with open('../Data/model.pickle', 'rb') as f:
+    model = pickle.load(f)
+
 
 # Chargement des identifiants clients depuis le fichier csv
 url = f"http://127.0.0.1:8050/get_id_clients"
@@ -46,6 +55,7 @@ app.layout = html.Div([
         value=NAME_COLS_TRAIN[0]
     ),
     dcc.Graph(id='histo_colonne'),
+    html.Img(id="global_int")
 ])
 
 @app.callback(
@@ -124,7 +134,7 @@ def get_solvabilite(id_client):
     if solvabilite > 0.5:
         message = "Le client est solvable ! Un prêt peut lui être accordé"
     else:
-        message = "Le client n'est pas solvable ! Il aura rien ce fdp"
+        message = "Le client n'est pas solvable !"
     return fig, message
 
 @app.callback(
@@ -140,6 +150,41 @@ def info_client(id_client):
     years_employed = f'Il est employé depuis {response["years_employed"]} ans'
     gender = f'Son genre est : {response["gender"]}'
     return (age, years_employed, gender)
+
+@app.callback(
+    Output('global_int', 'src'), 
+    Input('client-dropdown', 'value'), 
+    )
+def int_global(id_client):
+    # Displaying the Feature importance
+    top_corr_cols=['BURO_DAYS_CREDIT_MEAN', 'DAYS_BIRTH', 'PREV_NAME_CONTRACT_STATUS_Refused_MEAN', 'BURO_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MEAN', 'BURO_DAYS_CREDIT_UPDATE_MEAN', 'CC_CNT_DRAWINGS_ATM_CURRENT_MEAN', 'REGION_RATING_CLIENT_W_CITY']
+    features_importance = model.feature_importances_
+    sorted_features = np.argsort(features_importance)
+    features_df = pd.DataFrame(columns=['Feature', 'Importance value', ''])
+    features_df['Feature'] = np.array(list(top_corr_cols))[sorted_features]
+    features_df['Importance value'] = features_importance[sorted_features]
+    features_df = features_df.sort_values(['Importance value'],
+                                        ascending=False)
+    relevant_features = list(features_df.Feature)
+    features_df = features_df[features_df['Importance value'] > 0]
+
+    # Plot
+    # Setting up the figure
+    plt.style.use('seaborn')
+    fig = plt.figure(figsize=(25, 5))
+    ax = sns.barplot(x='Feature', y='Importance value', data=features_df)
+    fig = ax.get_figure()
+    ax.set_xticklabels(
+        ax.get_xticklabels(),
+        rotation=90,
+        ha='right')
+    ax.set_title('Feature importance')
+    ax.set_xlabel('Feature')
+    ax.set_ylabel('Importance value')
+    # Convert plot to PNG image
+    plt.savefig("assets/int.png")
+    return "assets/int.png"
+
 
 if __name__ == '__main__':
     app.run_server(port=8080)

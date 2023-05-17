@@ -5,7 +5,6 @@ import pickle
 import io
 from flask import send_file
 
-NAME_COLS_TRAIN =['BURO_DAYS_CREDIT_MEAN', 'DAYS_BIRTH', 'PREV_NAME_CONTRACT_STATUS_Refused_MEAN', 'BURO_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MEAN', 'BURO_DAYS_CREDIT_UPDATE_MEAN', 'CC_CNT_DRAWINGS_ATM_CURRENT_MEAN', 'REGION_RATING_CLIENT_W_CITY']
 app = Flask(__name__)
 
 # Charger le modèle entraîné
@@ -15,6 +14,8 @@ with open('../Data/model.pickle', 'rb') as f:
 # Charger le dataframe df_scoring.csv
 df = pd.read_csv('../Data/df_scoring.csv')
 df = df.set_index('SK_ID_CURR')
+
+NAME_COLS_TRAIN =['BURO_DAYS_CREDIT_MEAN', 'DAYS_BIRTH', 'PREV_NAME_CONTRACT_STATUS_Refused_MEAN', 'BURO_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MIN', 'CLOSED_DAYS_CREDIT_MEAN', 'BURO_DAYS_CREDIT_UPDATE_MEAN', 'CC_CNT_DRAWINGS_ATM_CURRENT_MEAN', 'REGION_RATING_CLIENT_W_CITY']
 
 # Définition de la route pour prédire la solvabilité d'un client
 @app.route('/predict_solvabilite/<int:id_client>')

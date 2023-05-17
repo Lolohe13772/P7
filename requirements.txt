@@ -9,4 +9,6 @@ flask
 dash
 dash-bootstrap-components
 requests
+matplotlib
+seaborn
 
