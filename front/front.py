@@ -55,7 +55,7 @@ app.layout = html.Div([
         value=NAME_COLS_TRAIN[0]
     ),
     dcc.Graph(id='histo_colonne'),
-    html.Img(id="global_int")
+    html.Div(id="global_int")
 ])
 
 @app.callback(
@@ -152,7 +152,7 @@ def info_client(id_client):
     return (age, years_employed, gender)
 
 @app.callback(
-    Output('global_int', 'src'), 
+    Output('global_int', 'children'), 
     Input('client-dropdown', 'value'), 
     )
 def int_global(id_client):
@@ -183,7 +183,7 @@ def int_global(id_client):
     ax.set_ylabel('Importance value')
     # Convert plot to PNG image
     plt.savefig("assets/int.png")
-    return "assets/int.png"
+    return html.Img(src="assets/int.png", width="100%")
 
 
 if __name__ == '__main__':
